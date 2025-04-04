@@ -4,7 +4,7 @@ node {
         checkout scm
     }
     stage('Build image') {
-        app = docker.build("myjenkins-blueocean")
+        app = docker.build("myjenkins-blueocean:2.492")
     }
     stage('Push image') {   
         docker.withRegistry('https://registry.hub.docker.com', 'docker-kiii') {
