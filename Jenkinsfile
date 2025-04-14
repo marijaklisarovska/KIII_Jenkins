@@ -1,16 +1,31 @@
-node {
-    def app
-    stage('Clone repository') {
-        checkout scm
+pipeline {
+    agent any
+    environment {
+        IMAGE_NAME = "marijaklisarovska/myjenkins-blueocean:2.492"
     }
-    stage('Build image') {
-        app = docker.build("marijaklisarovska/myjenkins-blueocean:2.492")
-    }
-    stage('Push image') {   
-        docker.withRegistry('https://registry.hub.docker.com', 'docker-kiii') {
-            app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
-            app.push("${env.BRANCH_NAME}-latest")
-            // signal the orchestrator that there is a new version
+    stages {
+        stage('Clone repository') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build image') {
+            steps {
+                script {
+                    app = docker.build("${IMAGE_NAME}")
+                }
+            }
+        }
+        stage('Push image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-kiii') {
+                        app.push("${env.BRANCH_NAME}-${env.BUILD_NUMBER}")
+                        app.push("${env.BRANCH_NAME}-latest")
+                        // signal the orchestrator that there is a new version
+                    }
+                }
+            }
         }
     }
 }
